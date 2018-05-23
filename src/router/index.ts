@@ -21,8 +21,10 @@ export class Router {
             const route = this.routes.find(r => this.pathMatch(location, r));
             if (route) {
                 return this.pathMatch(location, prefix);
-            } else {
+            } else if (this.defaultRoute) {
                 this.navigate(this.defaultRoute);
+                return false;
+            } else {
                 return false;
             }
         }
