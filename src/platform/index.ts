@@ -7,11 +7,11 @@ window.singleSpaAngularCli = window.singleSpaAngularCli || {};
 export class Platform {
 
     name: string;
-    router: any;
+    microRouter: any;
 
-    mount(name: string, router?: any): Observable<any> {
+    mount(name: string, microRouter?: any): Observable<any> {
         this.name = name;
-        this.router = router;
+        this.microRouter = microRouter;
         return Observable.create((observer: Observer<any>) => {
             if (this.isSingleSpaApp()) {
                 window.singleSpaAngularCli[this.name] = window.singleSpaAngularCli[this.name] || {};
@@ -28,12 +28,14 @@ export class Platform {
 
     unmount(module: any) {
         if (this.isSingleSpaApp()) {
+            window.singleSpaAngularCli[this.name].router = module.injector.get(this.microRouter);
             window.singleSpaAngularCli[this.name].unmount = () => {
                 if (module) {
-                    module.destroy();
-                    if (this.router) {
-                        module.injector.get(this.router).dispose();
+                    const router = window.singleSpaAngularCli[this.name].router;
+                    if (router) {
+                        module.injector.get(router).dispose();
                     }
+                    module.destroy();
                 }
             };
         }
