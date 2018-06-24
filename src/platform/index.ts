@@ -31,9 +31,9 @@ export class Platform {
             window.singleSpaAngularCli[this.name].router = module.injector.get(this.microRouter);
             window.singleSpaAngularCli[this.name].unmount = () => {
                 if (module) {
-                    const router = window.singleSpaAngularCli[this.name].router;
-                    if (router) {
-                        module.injector.get(router).dispose();
+                    const microRouter = window.singleSpaAngularCli[this.name].router;
+                    if (microRouter && microRouter.router) {
+                        microRouter.router.dispose();
                     }
                     module.destroy();
                 }
