@@ -26,7 +26,7 @@
   "homepage": "https://github.com/PlaceMe-SAS/single-spa-angular-cli#readme",
   "dependencies": {
     "@types/core-js": "^0.9.45",
-    "rxjs": "^5.5.6"
+    "rxjs": "^6.3.2"
   },
   "devDependencies": {
     "@angular/common": "^5.2.9",
