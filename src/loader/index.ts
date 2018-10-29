@@ -151,9 +151,13 @@ const bootstrap = (opts: Options, props: any) => {
 
 const mount = (opts: Options, props: any) => {
     return new Promise((resolve, reject) => {
-        getContainerEl(opts);
-        if (window.singleSpaAngularCli[opts.name]) {
+        const container = getContainerEl(opts);
+        if (window.singleSpaAngularCli[opts.name] && !opts.legacy) {
             window.singleSpaAngularCli[opts.name].mount(props);
+            resolve();
+        } else if (opts.legacy) {
+            container.innerHTML = '<ui-view id="primary-content" name="content" autoscroll="true"></ui-view>';
+            window.singleSpaAngularCli[opts.name] = window.angular.bootstrap(container, [opts.legacyModuleName]);
             resolve();
         } else {
             console.error(`Cannot mount ${opts.name} because that is not bootstraped`);
@@ -171,7 +175,11 @@ const unmount = (opts: Options, props: any) => {
             existingElement.parentNode.appendChild(newElement);
             existingElement.remove();
 
-            window.singleSpaAngularCli[opts.name].unmount();
+            if (!opts.legacy) {
+                window.singleSpaAngularCli[opts.name].unmount();
+            } else {
+                window.singleSpaAngularCli[opts.name].get('$rootScope').$destroy();
+            }
 
             if (getAppNames().indexOf(opts.name) !== -1) {
                 unloadApplication(opts.name, { waitForUnmount: true });
@@ -186,12 +194,16 @@ const unmount = (opts: Options, props: any) => {
 };
 
 const unload = (opts: Options, props: any) => {
-    return new Promise((resolve) => {
-        opts.scripts.concat(opts.styles).reduce(
-            (prev: Promise<undefined>, scriptName: string) => prev.then(unloadTag(`${opts.baseHref}/${scriptName}`)),
-            Promise.resolve(undefined)
-        );
-        resolve();
+    return new Promise((resolve, reject) => {
+      const scriptsPromise = opts.scripts.reduce(
+        (prev: Promise<undefined>, fileName: string) => prev.then(unloadTag(`${opts.baseHref}/${fileName}`)),
+        Promise.resolve(undefined)
+      );
+      const stylesPromise = opts.styles.reduce(
+        (prev: Promise<undefined>, fileName: string) => prev.then(unloadTag(`${opts.baseHref}/${fileName}`)),
+        Promise.resolve(undefined)
+      );
+      Promise.all([scriptsPromise, stylesPromise]).then(resolve, reject);
     });
 };
 
