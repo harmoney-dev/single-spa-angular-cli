@@ -172,8 +172,9 @@ const unmount = (opts: Options, props: any) => {
         if (window.singleSpaAngularCli[opts.name]) {
             const newElement = document.createElement(opts.selector);
             const existingElement = getContainerEl(opts);
-            existingElement.parentNode.appendChild(newElement);
+            const parentElement = existingElement.parentNode as HTMLElement;
             existingElement.remove();
+            parentElement.insertBefore(newElement, parentElement.querySelector(':first-child'));
 
             if (!opts.legacy) {
                 window.singleSpaAngularCli[opts.name].unmount();
